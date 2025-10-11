@@ -8,9 +8,9 @@
 
 1\. Create database:
 
-&nbsp;  ```sql
+   ```sql
 
-&nbsp;  CREATE DATABASE agriculture\_marketplace;
+   CREATE DATABASE agriculture\_marketplace;
 
 Import schema:
 
@@ -59,6 +59,12 @@ admin\_actions - Admin activity log
 
 
 disputes - User conflict resolution
+
+
+
+\## Database Functions
+
+\- `grade\_crop\_batch(batch\_id)` - Automatically grades crops using AI + sensor data against dynamic rules
 
 
 
