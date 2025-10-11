@@ -1,4 +1,3 @@
-
 -- Agriculture Marketplace Database Schema
 
 CREATE TABLE users (
