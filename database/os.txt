@@ -1,0 +1,3 @@
+C:\Users\DELL\deadlock_aware_banking_solution>g++ -std=c++14 -pthread -o banking_system src/main.cpp src/core/account.cpp src/deadlock/bankers_algo.cpp src/deadlock/deadlock_demo.cpp src/deadlock/deadlock_handler.cpp src/logging/logger.cpp src/scheduling/scheduler.cpp -I src -lpthread
+
+C:\Users\DELL\deadlock_aware_banking_solution>.\banking_system.exe
