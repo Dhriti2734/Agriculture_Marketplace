@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Agri Marketplace - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <div class="bg"></div>
+
+  <main class="auth-layout">
+    <header class="brand">
+      <img src="logo.png.png" alt="Agri Marketplace logo" class="brand-logo">
+      <div class="brand-sub">FAIRTRADE MADE EASY</div>
+    </header>
+
+    <section class="card">
+      <h2 class="card-title">LOGIN</h2>
+
+      <form class="login-form" action="#" method="post" autocomplete="on">
+        <label for="email">Email:</label>
+        <input id="email" name="email" type="email" placeholder="you@farm.example" required>
+
+        <label for="password">Password:</label>
+        <input id="password" name="password" type="password" placeholder="••••••••" required>
+
+        <button class="btn" type="submit">Login</button>
+      </form>
+
+      <nav class="card-links">
+        <a href="#">Forgot your password?</a>
+        <a href="signup.html">Not registered yet? Sign up</a>
+        <a href="#">Didn't receive confirmation instructions?</a>
+      </nav>
+    </section>
+  </main>
+
+  <div class="cookie-bar" id="cookieBar">
+    <div class="cookie-text">
+      Cookies help us deliver our services. By using our services, you agree to our use of cookies.
+    </div>
+    <div class="cookie-actions">
+      <button class="cookie-ok" id="cookieOk">OK</button>
+      <a class="cookie-learn" href="#" aria-label="Learn more about cookies">Learn more</a>
+    </div>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
