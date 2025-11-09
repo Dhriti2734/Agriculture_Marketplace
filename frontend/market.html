@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agri Marketplace - Market</title>
+  <link rel="stylesheet" href="market.css">
+</head>
+<body>
+
+  <header>
+    <h1>AGRI MARKETPLACE</h1>
+    <p>Fairtrade Made Easy</p>
+  </header>
+
+  <section class="market">
+    <h2>SELECT A PRODUCT TO BUY/SELL</h2>
+
+    <!-- Category Buttons -->
+    <div class="buttons">
+      <button class="product-btn active" data-type="grains">🌾 GRAINS</button>
+      <button class="product-btn" data-type="nuts">🥜 NUTS</button>
+      <button class="product-btn" data-type="coffee">☕ GREEN COFFEE</button>
+      <button class="product-btn" data-type="carbon">🌿 CARBON CREDITS</button>
+      <button class="product-btn" data-type="oils">🫒 OLIVE OIL & OTHER OILS</button>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Dynamic Product Output -->
+    <div class="output" id="output"></div>
+  </section>
+
+  <footer>
+    <p>©2025 Agri Marketplace. Fairtrade Made Easy.</p>
+  </footer>
+
+  <script src="market.js"></script>
+</body>
+</html>

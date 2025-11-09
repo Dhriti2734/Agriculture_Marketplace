@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Buyer Dashboard | Agri Marketplace</title>
+  <link rel="stylesheet" href="usersd.css"> <!-- shared -->
+  <style>
+    .product { background:#fff;border-radius:10px;padding:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);display:flex;flex-direction:column;gap:6px;justify-content:space-between; }
+    .product h4{ margin:0;font-size:17px;color:#2b6b2b }
+    .product .price{ font-weight:700;color:#333 }
+    .market-grid{ display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px }
+    .cart-item{ display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee }
+    .empty{ text-align:center;color:#777;padding:24px 0 }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><h2>Agri Buyer</h2></div>
+    <ul class="menu">
+      <li><a href="buyerd.html">Dashboard</a></li>
+      <li><a href="market.html">Marketplace</a></li>
+      <li class="active"><a href="ordersd.html">My Orders</a></li> <!-- moved active to Orders by default if you open ordersd.html; on dashboard you'll see highlight logic -->
+      <li><a href="../homee.html" class="logout">Logout</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1>Buyer Dashboard</h1>
+        <p class="subtitle">Manage your crops, orders and purchases</p>
+      </div>
+      <div class="controls">
+        <input id="searchBox" class="input" placeholder="Search crops...">
+        <button id="cartBtn" class="btn">Cart <span id="cartCount" class="cart-badge">0</span></button>
+      </div>
+    </header>
+
+    <section class="content">
+      <h2>Available Crops</h2>
+      <div id="productGrid" class="market-grid"></div>
+    </section>
+  </main>
+
+  <!-- CART MODAL -->
+  <div id="cartModal" class="modal-backdrop" style="display:none;">
+    <div class="modal" style="width:640px;max-width:calc(100% - 24px);">
+      <h3>Your Cart</h3>
+      <div id="cartItems"></div>
+      <div style="text-align:right;margin-top:10px;">
+        <strong>Total: <span id="cartTotal">₹0.00</span></strong>
+      </div>
+      <div class="modal-actions" style="justify-content:space-between;">
+        <button id="closeCart" class="btn">Close</button>
+        <button id="checkoutBtn" class="btn primary">Place Order</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="buyerd.js"></script>
+  <script>
+    (function(){
+      const links = document.querySelectorAll('.menu a');
+      const current = window.location.pathname.split('/').pop();
+      links.forEach(a => {
+        const hrefFile = a.getAttribute('href') ? a.getAttribute('href').split('/').pop() : '';
+        if (hrefFile === current) a.parentElement.classList.add('active');
+        else a.parentElement.classList.remove('active');
+      });
+    })();
+  </script>
+</body>
+</html>
