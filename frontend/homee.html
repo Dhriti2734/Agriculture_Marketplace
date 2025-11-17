@@ -19,12 +19,12 @@
       <li><a href="homee.html" class="active">Home</a></li>
       <li><a href="#" id="loginLink">Log in</a></li>
       <li><a href="#" id="signupLink">Sign up</a></li>
+      <li><a href="submit-crop.html">Submit Crop</a></li>
       <li><a href="#">Market</a></li>
       <li><a href="#">Crop Converter</a></li>
       <li><a href="#">About Us</a></li>
     </ul>
   </nav>
-
   </header>
 
   <!-- HERO SECTION -->
@@ -33,7 +33,7 @@
       <div class="hero-left">
         <h3>A B2B DIGITAL MARKETPLACE WHERE FAIR FOOD TRADE IS MADE EASY, FAST AND TRANSPARENT!</h3>
         <h1>BUY DIRECTLY FROM FARMERS</h1>
-        <button class="join-btn">JOIN NOW</button>
+        <button class="join-btn" onclick="window.location.href='signup.html'">JOIN NOW</button>
       </div>
       <div class="hero-right">
         <h4>SELECT A PRODUCT TO BUY/SELL</h4>
@@ -50,7 +50,7 @@
     </div>
   </section>
 
-  <!-- OUR SOLUTION -->
+  <!-- OUR SOLUTION SECTION -->
   <section class="solution">
     <h2>OUR <span>SOLUTION</span></h2>
     <p class="intro">Agri Marketplace is a digital B2B market solution that brings together Farmers and Industrial Buyers.</p>
@@ -63,51 +63,15 @@
         </p>
         <p><strong>Agri Marketplace does not buy or sell crops and is not a broker.</strong> Instead, we offer you the ability to effortlessly market your crop via our platform.</p>
         <div class="solution-buttons">
-          <button class="explore-btn">Explore the Marketplace</button>
+          <button class="explore-btn" onclick="window.location.href='submit-crop.html'">Submit Your Crop</button>
           <button class="learn-btn">Learn More About Us</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
-  <section class="how">
-    <h2>HOW <span>IT WORKS</span></h2>
-    <h4>TAKE A LOOK AT OUR PLATFORM DEMO.</h4>
-    <ol>
-      <li>Sign-up to the platform</li>
-      <li>Create your offer or bid</li>
-      <li>Set a quantity & price</li>
-      <li>Provide crop characteristics & details</li>
-      <li>Decide upon your preferred incoterm</li>
-      <li>Choose logistic and/or quality check services</li>
-      <li>Post your seller offer or buyer bid</li>
-      <li>Stay updated by email or notifications</li>
-    </ol>
-    <img src="platform-demo.png" alt="Platform Demo" class="demo-img">
-  </section>
+  <!-- HOW IT WORKS, PRICING, FEATURES sections remain same -->
 
-  <!-- PRICING -->
-  <section class="pricing">
-    <h2>PRICING</h2>
-    <p>
-      Both buyer and seller pay a small fee to Agri Marketplace once a transaction is made. We price transparently and keep you updated through all steps of the process.
-      Our pricing is based on your transaction’s value & volume.
-    </p>
-    <img src="pricing-bag.png" alt="Pricing Image" class="pricing-img">
-  </section>
-
-  <!-- KEY FEATURES -->
-  <section class="features">
-    <h2>KEY <span>FEATURES</span></h2>
-    <p>Discover how Agri Marketplace can benefit you and all other food supply chain actors.</p>
-    <div class="feature-grid">
-      <div class="feature">🌐<h4>Global Access</h4></div>
-      <div class="feature">🤝<h4>Fair Trade</h4></div>
-      <div class="feature">💰<h4>Transparent Deals</h4></div>
-      <div class="feature">🔒<h4>Secure Payments</h4></div>
-    </div>
-  </section>
 
   <!-- FOOTER -->
   <footer>
@@ -131,29 +95,33 @@
     </div>
     <p class="copyright">©2025 Agri Marketplace - All Rights Reserved</p>
   </footer>
-   <script>
+
+  <script>
     document.addEventListener("DOMContentLoaded", function() {
       const loginLink = document.getElementById("loginLink");
       loginLink.addEventListener("click", function(event) {
         event.preventDefault();
         window.location.href = "login.html";
-         // Go to the login page
       });
-    });
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
+      
       const signupLink = document.getElementById("signupLink");
       signupLink.addEventListener("click", function(event) {
         event.preventDefault();
         window.location.href = "signup.html";
-         // Go to the sign up  page
       });
     });
+
+    // Backend connection test 
+    async function testBackend() {
+        try {
+            const response = await fetch('http://localhost:5000/api/batches');
+            const data = await response.json();
+            console.log('✅ Backend connected:', data);
+        } catch (error) {
+            console.log('❌ Backend connection failed');
+        }
+    }
+    testBackend();
   </script>
-  
-
-
 </body>
-
 </html>

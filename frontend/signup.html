@@ -1,137 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AgriMarketplace | Sign Up</title>
-  <link rel="stylesheet" href="signup.css">
+    <title>Sign Up - Agri Marketplace</title>
+    <link rel="stylesheet" href="homee.css">
+    <style>
+        .signup-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .signup-container input, .signup-container select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .signup-container button {
+            width: 100%;
+            padding: 12px;
+            background: #4b7c2f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>AGRIMARKETPLACE</h1>
-    <p>FAIRTRADE MADE EASY</p>
-    <nav>
-      <a href="#">HOME</a>
-      <a href="#">MARKET</a>
-      <a href="#">CROP CONVERTER</a>
-      <a href="#">ABOUT US</a>
-    </nav>
-  </header>
-
-  <section class="signup-container">
-    <h2>SIGN UP</h2>
-    <p>If you are already registered <a href="login.html">Login here</a>.</p>
-
-
-    <form>
-      <div class="form-row">
-        <label>I am*</label>
-        <div class="radio-group">
-          <label><input type="radio" name="role"> Buyer</label>
-          <label><input type="radio" name="role"> Seller</label>
-          <label><input type="radio" name="role"> Both</label>
+    <header>
+        <div class="logo">
+            <h1>AGRI<span>MARKETPLACE</span></h1>
         </div>
-      </div>
+        <nav>
+            <a href="homee.html">Home</a>
+            <a href="login.html">Login</a>
+        </nav>
+    </header>
 
-      <div class="form-row two-cols">
-        <div>
-          <label>First Name</label>
-          <input type="text" placeholder="First Name">
-        </div>
-        <div>
-          <label>Last Name</label>
-          <input type="text" placeholder="Last Name">
-        </div>
-      </div>
+    <div class="signup-container">
+        <h2>Create Your Account</h2>
+        <form id="signupForm">
+            <input type="text" id="name" placeholder="Full Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <select id="userType" required>
+                <option value="">Select User Type</option>
+                <option value="farmer">Farmer</option>
+                <option value="buyer">Buyer</option>
+                
+            </select>
+            <button type="submit">Sign Up</button>
+        </form>
+        <p id="signupResult" style="margin-top: 15px;"></p>
+    </div>
 
-      <div class="form-row">
-        <label>Company</label>
-        <input type="text" placeholder="Company Name">
-      </div>
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                userType: document.getElementById('userType').value  // Backend mein ye 'user_type' map karo
+            };
 
-      <div class="form-row two-cols">
-        <div>
-          <label>Company VAT*</label>
-          <input type="text" placeholder="VAT Number">
-        </div>
-        <div>
-          <label>Mobile Number*</label>
-          <input type="text" placeholder="+91 9876543210">
-        </div>
-      </div>
+            // Basic validation
+            if (!formData.name || !formData.email || !formData.password || !formData.userType) {
+                document.getElementById('signupResult').innerHTML = '<p style="color: red;">❌ All fields required!</p>';
+                return;
+            }
 
-      <div class="form-row">
-        <label>Fiscal Address*</label>
-        <input type="text" placeholder="Street, City, State">
-      </div>
+            // Password strength basic check 
+            if (formData.password.length < 6) {
+                document.getElementById('signupResult').innerHTML = '<p style="color: red;">❌ Password must be at least 6 characters!</p>';
+                return;
+            }
 
-      <div class="form-row two-cols">
-        <div>
-          <label>Zip Code*</label>
-          <input type="text" placeholder="Zip Code">
-        </div>
-        <div>
-          <label>Country</label>
-          <select>
-            <option>Select one</option>
-            <option>India</option>
-            <option>USA</option>
-            <option>UK</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <label>Company Activity*</label>
-        <select>
-          <option>Select one</option>
-          <option>Exporter</option>
-          <option>Importer</option>
-          <option>Producer</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <label>Preferred Product(s)</label>
-        <div class="checkbox-group">
-          <label><input type="checkbox"> Corn</label>
-          <label><input type="checkbox"> Almond</label>
-          <label><input type="checkbox"> Barley</label>
-          <label><input type="checkbox"> Wheat</label>
-          <label><input type="checkbox"> Cashew</label>
-          <label><input type="checkbox"> Coffee</label>
-          <label><input type="checkbox"> Cocoa</label>
-          <label><input type="checkbox"> Olive Oil</label>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <label>Other Preferred Product(s)</label>
-        <input type="text" placeholder="Other Products">
-      </div>
-
-      <div class="form-row">
-        <label>Email</label>
-        <input type="email" placeholder="example@email.com">
-      </div>
-
-      <div class="form-row two-cols">
-        <div>
-          <label>Password</label>
-          <input type="password" placeholder="At least 6 characters">
-        </div>
-        <div>
-          <label>Password Confirmation</label>
-          <input type="password" placeholder="Re-enter Password">
-        </div>
-      </div>
-
-      <div class="form-row terms">
-        <label><input type="checkbox"> I agree with the <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</label>
-      </div>
-
-      <button type="submit" class="btn">Sign Up</button>
-    </form>
-  </section>
+            try {
+                const response = await fetch('http://localhost:5000/api/signup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                const resultElement = document.getElementById('signupResult');
+                
+                if(result.success) {
+                    resultElement.innerHTML = '<p style="color: green;">✅ Signup successful! Redirecting to login...</p>';
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    
+                    resultElement.innerHTML = `<p style="color: red;">❌ ${result.error || 'Signup failed'}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('signupResult').innerHTML = '<p style="color: red;">❌ Connection error: ' + error.message + '</p>';
+            }
+        });
+    </script>
 </body>
 </html>
