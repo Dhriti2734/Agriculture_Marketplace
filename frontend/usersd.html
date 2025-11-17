@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Users | Agri Admin</title>
+  <link rel="stylesheet" href="usersd.css">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><h2>Agri Admin</h2></div>
+    <ul class="menu">
+      <li><a href="dashb.html">Dashboard</a></li>
+      <li class="active"><a href="usersd.html">Users</a></li>
+      <li><a href="grading.html">Grading</a></li>
+      <li><a href="transactions.html">Transactions</a></li>
+      <li><a href="homee.html" class="logout">Logout</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1>Users</h1>
+        <p class="subtitle">Manage users: add, edit, delete and export.</p>
+      </div>
+      <div class="controls">
+        <input id="userSearch" type="search" placeholder="Search users...">
+        <button id="btnAddUser" class="btn">Add User</button>
+        <button id="btnExportUsers" class="btn secondary">Export CSV</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="table-wrap">
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th><input id="selectAll" type="checkbox" aria-label="Select all users"></th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- JS populates rows -->
+          </tbody>
+        </table>
+      </div>
+      <div class="bulk-actions">
+        <button id="btnBulkDelete" class="btn danger">Delete Selected</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div id="modalBackdrop" class="modal-backdrop" style="display:none;">
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3 id="modalTitle">Add User</h3>
+      <form id="modalForm">
+        <label class="label">Name</label>
+        <input id="u_name" class="input" required>
+
+        <label class="label">Email</label>
+        <input id="u_email" class="input" type="email" required>
+
+        <label class="label">Role</label>
+        <select id="u_role" class="input">
+          <option>Buyer</option>
+          <option>Seller</option>
+          <option>Admin</option>
+        </select>
+
+        <label class="label">Status</label>
+        <select id="u_status" class="input">
+          <option>active</option>
+          <option>inactive</option>
+        </select>
+
+        <div class="modal-actions">
+          <button type="button" id="closeModal" class="btn">Close</button>
+          <button type="submit" id="saveUser" class="btn primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="usersd.js"></script>
+
+  <script>
+    (function(){
+      const links = document.querySelectorAll('.menu a');
+      const current = window.location.pathname.split('/').pop();
+      links.forEach(a => {
+        const hrefFile = a.getAttribute('href') ? a.getAttribute('href').split('/').pop() : '';
+        if (hrefFile === current) a.parentElement.classList.add('active');
+        else a.parentElement.classList.remove('active');
+      });
+    })();
+  </script>
+</body>
+</html>
