@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submit Crop - Agri Marketplace</title>
+    <link rel="stylesheet" href="homee.css">
+
+    <style>
+        .crop-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .crop-container input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .crop-container button {
+            width: 100%;
+            padding: 12px;
+            background: #4b7c2f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #imagePreview {
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="crop-container">
+
+        <h2>Submit Your Crop for AI Grading</h2>
+
+        <form id="cropForm" enctype="multipart/form-data">
+
+            <input type="number" id="farmer_id" placeholder="Farmer ID" required>
+            <input type="text" id="crop_type" placeholder="Crop Type" required>
+            <input type="number" id="quantity_kg" placeholder="Quantity (kg)" step="0.01" required>
+            <input type="number" id="desired_price_per_kg" placeholder="Price per kg" step="0.01" required>
+
+            <label>Select Crop Image</label>
+            <input type="file" id="cropImage" accept="image/*" required>
+            <img id="imagePreview">
+
+            <button type="submit">Submit Crop</button>
+
+        </form>
+
+        <div id="cropResult" style="margin-top:15px;"></div>
+
+        <h3 style="margin-top:30px;">Recent Submissions</h3>
+        <button onclick="loadCrops()">Refresh</button>
+        <div id="cropsList"></div>
+
+    </div>
+
+<script>
+
+// Preview Image
+document.getElementById("cropImage").addEventListener("change", function() {
+    let file = this.files[0];
+    if (file) {
+        let img = document.getElementById("imagePreview");
+        img.src = URL.createObjectURL(file);
+        img.style.display = "block";
+    }
+});
+
+// Submit Crop
+// Use this submission logic (replace existing)
+document.getElementById('cropForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    let formData = new FormData();
+    formData.append('farmer_id', document.getElementById('farmer_id').value);
+    formData.append('crop_type', document.getElementById('crop_type').value);
+    formData.append('quantity_kg', document.getElementById('quantity_kg').value);
+    formData.append('desired_price_per_kg', document.getElementById('desired_price_per_kg').value);
+    formData.append('image', document.getElementById('cropImage').files[0]);
+
+    const out = document.getElementById('cropResult');
+    out.innerHTML = 'Submitting...';
+
+    try {
+        const resp = await fetch('http://127.0.0.1:5000/api/submit-crop-with-image', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await resp.json();
+        if (!resp.ok) {
+            // show AI rejection or other error
+            out.innerHTML = `<p style="color:red;">❌ ${data.error || 'Server error'}</p>`;
+            if (data.model_check) out.innerHTML += `<pre>${JSON.stringify(data.model_check)}</pre>`;
+            return;
+        }
+        // success
+        out.innerHTML = `<p style="color:green;">✅ Crop submitted! Batch ID: ${data.batch_id}</p>
+                         <p><strong>Grade:</strong> ${data.final_grade}</p>
+                         <pre>${JSON.stringify(data.ai_results, null, 2)}</pre>
+                         <pre>Reference: ${JSON.stringify(data.reference, null, 2)}</pre>`;
+    } catch(err) {
+        out.innerHTML = `<p style="color:red;">Network error: ${err}</p>`;
+    }
+});
+
+
+// Load Batches
+async function loadCrops() {
+    try {
+        const res = await fetch("http://127.0.0.1:5000/api/batches");
+        const data = await res.json();
+        
+        let html = "<ul>";
+        data.batches.forEach(b => {
+            html += `<li><b>Batch ${b.batch_id}</b> - ${b.crop_type}, ${b.quantity_kg}kg, Status: ${b.current_status}</li>`;
+        });
+        html += "</ul>";
+        
+        document.getElementById("cropsList").innerHTML = html;
+    }
+    catch {
+        document.getElementById("cropsList").innerHTML = "Error loading crops";
+    }
+}
+
+loadCrops();
+
+</script>
+
+</body>
+</html>
