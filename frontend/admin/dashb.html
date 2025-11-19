@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin Dashboard | Agri Marketplace</title>
 
+  <!-- KEEP your original CSS -->
   <link rel="stylesheet" href="dashb.css">
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Sidebar -->
+  <!-- Sidebar (KEEP layout & classes unchanged) -->
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <h2>Agri Admin</h2>
@@ -139,18 +140,149 @@
     </div>
   </div>
 
-  <script src="dashb.js"></script>
-
+  <!-- --- NEW: Admin behavior JS (only functionality added, no CSS changes) --- -->
   <script>
-    (function(){
-      const links = document.querySelectorAll('.menu a');
-      const current = window.location.pathname.split('/').pop();
-      links.forEach(a => {
-        const hrefFile = a.getAttribute('href') ? a.getAttribute('href').split('/').pop() : '';
-        if (hrefFile === current) a.parentElement.classList.add('active');
-        else a.parentElement.classList.remove('active');
-      });
-    })();
+  (function(){
+    const API_BASE = location.origin.replace(/:\d+$/,':5000') || 'http://127.0.0.1:5000';
+    function api(path){ return API_BASE + path; }
+
+    const refreshBtn = document.getElementById('refreshBtn');
+    const exportBtn = document.getElementById('exportCsv');
+    const reportsTableBody = document.querySelector('#reportsTable tbody');
+    const filterGrade = document.getElementById('filterGrade');
+    const sortBy = document.getElementById('sortBy');
+
+    refreshBtn.addEventListener('click', loadReports);
+    exportBtn.addEventListener('click', exportCsv);
+    filterGrade.addEventListener('change', loadReports);
+    sortBy.addEventListener('change', loadReports);
+
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('modalBackdrop').style.display = 'none';
+    });
+
+    document.getElementById('modalForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const batchId = document.getElementById('mBatch').value;
+      const grade = document.getElementById('mGrade').value;
+      try {
+        let resp = await fetch(api(`/api/admin/crops/${batchId}/grade`), {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({grade})
+        });
+        if (!resp.ok) resp = await fetch(api(`/api/batches/${batchId}/grade`), {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({grade})
+        });
+        const jd = await resp.json();
+        if (!resp.ok) return alert('Save failed: ' + (jd.error || resp.statusText));
+        alert('Saved');
+        document.getElementById('modalBackdrop').style.display = 'none';
+        loadReports();
+      } catch (err) {
+        console.error(err);
+        alert('Network error');
+      }
+    });
+
+    async function loadReports(){
+      reportsTableBody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+      try {
+        let resp = await fetch(api('/api/admin/crops?limit=50'));
+        if (!resp.ok) resp = await fetch(api('/api/batches?limit=50'));
+        const data = await resp.json();
+        const items = data.crops || data.batches || data.items || data || [];
+        // apply simple filter/sort client-side if needed
+        const gradeFilter = filterGrade.value;
+        let rows = items.filter(i => !gradeFilter || (i.final_grade || i.grade || '').toString() === gradeFilter);
+
+        // sorting
+        if (sortBy.value === 'date_asc') rows.sort((a,b)=> new Date(a.created_at||a.date||0) - new Date(b.created_at||b.date||0));
+        else if (sortBy.value === 'farmer_asc') rows.sort((a,b)=> (''+(a.farmer_name||a.farmer_id||'')).localeCompare(''+(b.farmer_name||b.farmer_id||'')));
+        else rows.sort((a,b)=> new Date(b.created_at||b.date||0) - new Date(a.created_at||a.date||0));
+
+        if (!rows.length) {
+          reportsTableBody.innerHTML = '<tr><td colspan="6">No reports found</td></tr>';
+          return;
+        }
+
+        reportsTableBody.innerHTML = '';
+        rows.forEach(it => {
+          const batch = it.batch_id || it.id || '—';
+          const farmer = it.farmer_name || it.farmer_id || (it.farmer && it.farmer.name) || '—';
+          const crop = it.crop_type || it.crop || '—';
+          const grade = it.final_grade || it.grade || 'pending';
+          const date = it.created_at || it.date || '—';
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${batch}</td><td>${farmer}</td><td>${crop}</td><td>${grade}</td><td>${date}</td>
+            <td>
+              <button class="viewBtn" data-batch="${batch}">View</button>
+            </td>`;
+          reportsTableBody.appendChild(tr);
+        });
+
+        // attach view handlers
+        document.querySelectorAll('.viewBtn').forEach(b => b.addEventListener('click', openModal));
+
+      } catch (err) {
+        console.error(err);
+        reportsTableBody.innerHTML = '<tr><td colspan="6">Error loading reports</td></tr>';
+      }
+    }
+
+    async function openModal(e){
+      const batch = e.currentTarget.dataset.batch;
+      try {
+        let resp = await fetch(api(`/api/admin/crops/${batch}`));
+        if (!resp.ok) resp = await fetch(api(`/api/batches/${batch}`));
+        const data = await resp.json();
+        const item = data.crop || data.batch || data || {};
+        document.getElementById('mBatch').value = batch;
+        document.getElementById('mFarmer').value = item.farmer_name || item.farmer_id || (item.farmer && item.farmer.name) || '';
+        document.getElementById('mCrop').value = item.crop_type || item.crop || '';
+        document.getElementById('mGrade').value = item.final_grade || item.grade || 'A';
+        document.getElementById('mDate').value = (item.created_at || item.date || '').split('T')[0];
+        document.getElementById('modalBackdrop').style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        alert('Failed to load report');
+      }
+    }
+
+    async function exportCsv(){
+      try {
+        let resp = await fetch(api('/api/admin/crops/export'));
+        if (!resp.ok) resp = await fetch(api('/api/batches/export'));
+        if (!resp.ok) return alert('Export not available on server');
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'crops_export.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (err) {
+        console.error(err);
+        alert('Export failed');
+      }
+    }
+
+    // init
+    loadReports();
+
+    // small sidebar active class upkeep (keep your existing behavior)
+    const links = document.querySelectorAll('.menu a');
+    const current = window.location.pathname.split('/').pop();
+    links.forEach(a => {
+      const hrefFile = a.getAttribute('href') ? a.getAttribute('href').split('/').pop() : '';
+      if (hrefFile === current) a.parentElement.classList.add('active');
+      else a.parentElement.classList.remove('active');
+    });
+
+  })();
   </script>
 </body>
 </html>

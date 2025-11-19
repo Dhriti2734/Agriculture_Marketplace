@@ -1,113 +1,61 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Transactions | Agri Admin</title>
-  <link rel="stylesheet" href="usersd.css">
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <title>Transactions - Admin | Agri Marketplace</title>
+  <link rel="stylesheet" href="dashb.css">
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="brand"><h2>Agri Admin</h2></div>
-    <ul class="menu">
-      <li><a href="dashb.html">Dashboard</a></li>
-      <li><a href="usersd.html">Users</a></li>
-      <li><a href="cropsd.html">Crops</a></li>
-      <li><a href="gradingd.html">Grading Reports</a></li>
-      <li class="active"><a href="transactionsd.html">Transactions</a></li>
-      <li><a href="homee.html" class="logout">Logout</a></li>
-    </ul>
-  </aside>
+  <header><h1>Transactions</h1><button id="refreshTx">Refresh</button><button id="exportTx">Export CSV</button></header>
 
-  <main class="main">
-    <header class="topbar">
-      <div>
-        <h1>Transactions</h1>
-        <p class="subtitle">View and manage transaction records.</p>
-      </div>
-      <div class="controls">
-        <input id="txSearch" type="search" placeholder="Search transactions...">
-        <select id="txStatusFilter" class="input">
-          <option value="">All status</option>
-          <option value="pending">pending</option>
-          <option value="completed">completed</option>
-          <option value="failed">failed</option>
-        </select>
-        <button id="btnExportTx" class="btn secondary">Export CSV</button>
-      </div>
-    </header>
-
-    <section class="content">
-      <div class="table-wrap">
-        <table id="txTable">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Buyer</th>
-              <th>Seller</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- rows added by JS -->
-          </tbody>
-        </table>
-      </div>
-
-      <div class="bulk-actions">
-        <button id="btnMarkComplete" class="btn">Mark Selected Complete</button>
-        <button id="btnDeleteTx" class="btn danger">Delete Selected</button>
-      </div>
-    </section>
+  <main>
+    <table id="txTable">
+      <thead><tr><th>Txn ID</th><th>Buyer</th><th>Batch</th><th>Qty</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </main>
 
-  <!-- Modal -->
-  <div id="modalBackdrop" class="modal-backdrop" style="display:none;">
-    <div class="modal" role="dialog" aria-modal="true">
-      <h3 id="modalTitle">Transaction</h3>
-      <form id="modalForm">
-        <label class="label">Transaction ID</label>
-        <input id="t_id" class="input" readonly>
+<script>
+(function(){
+  const API_BASE = location.origin.replace(/:\d+$/,':5000') || 'http://127.0.0.1:5000';
+  function api(p){ return API_BASE + p; }
 
-        <label class="label">Buyer</label>
-        <input id="t_buyer" class="input">
+  const tbody = document.querySelector('#txTable tbody');
+  document.getElementById('refreshTx').addEventListener('click', loadTx);
+  document.getElementById('exportTx').addEventListener('click', exportTx);
 
-        <label class="label">Seller</label>
-        <input id="t_seller" class="input">
-
-        <label class="label">Amount</label>
-        <input id="t_amount" class="input" type="number" step="0.01">
-
-        <label class="label">Status</label>
-        <select id="t_status" class="input"><option>pending</option><option>completed</option><option>failed</option></select>
-
-        <label class="label">Date</label>
-        <input id="t_date" class="input" type="date">
-
-        <div class="modal-actions">
-          <button type="button" id="closeModal" class="btn">Close</button>
-          <button type="submit" id="saveModal" class="btn primary">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script src="transactionsd.js"></script>
-
-  <script>
-    (function(){
-      const links = document.querySelectorAll('.menu a');
-      const current = window.location.pathname.split('/').pop();
-      links.forEach(a => {
-        const hrefFile = a.getAttribute('href') ? a.getAttribute('href').split('/').pop() : '';
-        if (hrefFile === current) a.parentElement.classList.add('active');
-        else a.parentElement.classList.remove('active');
+  async function loadTx(){
+    tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+    try {
+      let resp = await fetch(api('/api/admin/transactions'));
+      if (!resp.ok) resp = await fetch(api('/api/transactions'));
+      const data = await resp.json();
+      const txs = data.transactions || data || [];
+      if (!txs.length) { tbody.innerHTML = '<tr><td colspan="6">No transactions</td></tr>'; return; }
+      tbody.innerHTML = '';
+      txs.forEach(t=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${t.id||t.txn_id}</td><td>${t.buyer_name||t.buyer||'—'}</td><td>${t.batch_id||t.batch||'—'}</td><td>${t.quantity_kg||t.qty||t.quantity||'—'}</td><td>${t.amount||t.total||'—'}</td><td>${t.status||'—'}</td>`;
+        tbody.appendChild(tr);
       });
-    })();
-  </script>
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = '<tr><td colspan="6">Failed to load transactions</td></tr>';
+    }
+  }
+
+  async function exportTx(){
+    try {
+      let resp = await fetch(api('/api/admin/transactions/export'));
+      if (!resp.ok) resp = await fetch(api('/api/transactions/export'));
+      if (!resp.ok) return alert('Export not available');
+      const blob = await resp.blob(); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'transactions.csv'; a.click();
+    } catch (err) { console.error(err); alert('Export failed'); }
+  }
+
+  loadTx();
+})();
+</script>
 </body>
 </html>

@@ -12,7 +12,9 @@ import bcrypt
 import importlib.util
 
 app = Flask(__name__)
-CORS(app)
+
+# UPDATED CORS
+CORS(app, supports_credentials=True)
 
 print("🚀 Starting Flask Backend...")
 
@@ -55,7 +57,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ---------------- HELPERS ----------------
 def _to_py_scalar(x):
-    # convert numpy types to Python native if needed
     if isinstance(x, (np.float32, np.float64)):
         return float(x)
     return x
@@ -146,8 +147,9 @@ def submit_crop_with_image():
         if ai_module is None:
             return jsonify({"success": False, "error": "AI module not loaded"}), 500
 
-        # form fields
-        farmer_id = request.form.get('farmer_id')
+        # UPDATED: Convert farmer_id to int
+        farmer_id = int(request.form.get('farmer_id'))
+
         crop_type = request.form.get('crop_type')
         quantity_kg = request.form.get('quantity_kg')
         desired_price_per_kg = request.form.get('desired_price_per_kg')
@@ -156,29 +158,23 @@ def submit_crop_with_image():
         if not all([farmer_id, crop_type, quantity_kg, image]):
             return jsonify({"success": False, "error": "Missing fields"}), 400
 
-        # Save image
         filename = f"batch_{int(time.time())}_{image.filename}"
         save_path = os.path.join(UPLOAD_FOLDER, filename)
         image.save(save_path)
 
-        # ---- AI analysis: we PASS expected_crop so AI can validate ----
         ai_results = ai_module.analyze_crop_image(save_path, expected_crop=crop_type)
 
-        # If AI indicates mismatch -> STRICT policy = reject and return model_check info
         if not ai_results.get("match", True):
-            # delete saved file? (optional) keep for debug -> we keep
             return jsonify({
                 "success": False,
                 "error": ai_results.get("message", "Image crop type mismatch"),
                 "model_check": ai_results.get("detected_crop")
             }), 400
 
-        # Convert numpy types in ai_results
         for k, v in list(ai_results.items()):
             if isinstance(v, (np.float32, np.float64)):
                 ai_results[k] = float(v)
 
-        # ---- DB reference row (hybrid strategy) ----
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
@@ -204,7 +200,6 @@ def submit_crop_with_image():
                 "size_index": ref[8]
             }
         else:
-            # fallback defaults
             ref_row = {
                 "moisture": 12.0,
                 "test_weight": 75.0,
@@ -217,7 +212,6 @@ def submit_crop_with_image():
                 "size_index": 1.0
             }
 
-        # ---- Insert into crop_batches ----
         cur.execute("""
             INSERT INTO crop_batches
             (farmer_id, crop_type, quantity_kg, desired_price_per_kg, current_status, created_at, updated_at)
@@ -228,7 +222,6 @@ def submit_crop_with_image():
         batch_id = cur.fetchone()[0]
         conn.commit()
 
-        # ---- Save image + AI data ----
         cur.execute("""
             INSERT INTO crop_images
             (batch_id, image_url, image_type, upload_order, is_verified, ai_analysis_data)
@@ -238,8 +231,6 @@ def submit_crop_with_image():
         image_id = cur.fetchone()[0]
         conn.commit()
 
-        # ---- Insert quality_measurements (HYBRID):
-        # Use AI defect/color; use DB moisture/test_weight (ref_row)
         cur.execute("""
             INSERT INTO quality_measurements
             (batch_id, defect_percentage, color_uniformity_score, size_variance,
@@ -260,12 +251,10 @@ def submit_crop_with_image():
         measurement_id = cur.fetchone()[0]
         conn.commit()
 
-        # ---- Call DB grading function ----
         cur.execute("SELECT grade_crop_batch(%s)", (batch_id,))
         final_grade = cur.fetchone()[0]
         conn.commit()
 
-        # update batch status
         cur.execute("UPDATE crop_batches SET current_status='graded', updated_at=CURRENT_TIMESTAMP WHERE batch_id=%s",
                     (batch_id,))
         conn.commit()
